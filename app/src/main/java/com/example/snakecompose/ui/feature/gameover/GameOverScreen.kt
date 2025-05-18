@@ -1,7 +1,5 @@
 package com.example.snakecompose.ui.feature.gameover
 
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +14,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +30,7 @@ fun GameOverScreen(
         SnakeComposeTheme {
             Surface(
                 modifier = Modifier.fillMaxSize(),
+                color = Color(4285563448)
             ) {
                 GameOverContent(score, navigateToGameScreen)
             }
@@ -40,8 +41,11 @@ fun GameOverScreen(
 fun GameOverContent(score: Int,navigateToGameScreen: () -> Unit = {}) {
 
     Scaffold(
+        containerColor = Color.Transparent,
         floatingActionButton = {
             FloatingActionButton(
+                contentColor = White,
+                containerColor = Color(4283126560),
                 onClick = {
                     navigateToGameScreen()
                 }
@@ -85,6 +89,7 @@ fun GameOverPreview(){
     SnakeComposeTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
+            color = Color(4285563448)
         ){
             GameOverContent(score)
         }

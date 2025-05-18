@@ -1,16 +1,17 @@
 package com.example.snakecompose.ui.feature.home
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,6 +25,7 @@ import com.example.snakecompose.ui.theme.SnakeComposeTheme
         SnakeComposeTheme {
             Surface(
                 modifier = Modifier.fillMaxSize(),
+                color = Color(4285563448)
             ) {
                 HomeSnakeGameContent(navigateToGameScreen)
             }
@@ -32,12 +34,12 @@ import com.example.snakecompose.ui.theme.SnakeComposeTheme
 
     @Composable
     fun HomeSnakeGameContent(navigateToGameScreen: () -> Unit) {
-        
-        Scaffold(){ paddinValues ->
-            Column(
+
+        val buttonsColor = ButtonColors(Color(4283126560), White, White, White)
+
+         Column(
                 modifier = Modifier
-                    .consumeWindowInsets(paddinValues)
-                    .padding(16.dp)
+                    .padding(16.dp),
             ) {
                 Text(
                     modifier = Modifier.fillMaxWidth()
@@ -51,15 +53,14 @@ import com.example.snakecompose.ui.theme.SnakeComposeTheme
                 Button(
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 15.dp),
-                    onClick = {
+                    colors = buttonsColor,
+                            onClick = {
                         navigateToGameScreen()
                     }
                 ){
                     Text(text = "Start Game")
                 }
             }
-
-        }
 
     }
 
@@ -71,6 +72,7 @@ import com.example.snakecompose.ui.theme.SnakeComposeTheme
         SnakeComposeTheme {
             Surface(
                 modifier = Modifier.fillMaxSize(),
+                color = Color(4285563448)
             ){
                 HomeSnakeGameScreen()
             }
