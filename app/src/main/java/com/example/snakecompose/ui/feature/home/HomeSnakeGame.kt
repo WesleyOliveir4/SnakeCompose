@@ -1,9 +1,13 @@
 package com.example.snakecompose.ui.feature.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Surface
@@ -12,10 +16,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.snakecompose.R
 import com.example.snakecompose.ui.theme.SnakeComposeTheme
 
     @Composable
@@ -49,8 +55,16 @@ import com.example.snakecompose.ui.theme.SnakeComposeTheme
                     fontSize = 35.sp,
                 )
 
+                 Image(
+                     modifier = Modifier.fillMaxWidth()
+                         .padding(top = 15.dp)
+                         .size(120.dp,120.dp),
+                     painter = painterResource(id = R.drawable.snake),
+                     contentDescription = "Game Over"
+                 )
 
-                Button(
+
+             Button(
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 15.dp),
                     colors = buttonsColor,

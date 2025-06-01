@@ -1,5 +1,6 @@
-package com.example.snakecompose.ui.feature.snakegame
+package com.example.snakecompose.ui.feature.snakegame.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -29,123 +30,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.snakecompose.R
+import com.example.snakecompose.ui.feature.snakegame.state.SnakeGameState
+import com.example.snakecompose.ui.feature.snakegame.viewmodel.SnakeViewModel
 import com.example.snakecompose.ui.theme.SnakeComposeTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlin.random.Random
 
-data class State(val food: Pair<Int, Int>, val snake: List<Pair<Int, Int>>)
-
-class Game(private val scope: CoroutineScope) {
-
-    private val mutex = Mutex()
-    private val mutableStateFieldGame =
-        MutableStateFlow(State(food = Pair(5, 5), snake = listOf(Pair(7, 7))))
-    val stateFieldGame: Flow<State> = mutableStateFieldGame
-
-    private val mutablePoints = MutableStateFlow(0)
-    val points: Flow<Int> = mutablePoints
-
-    private val mutableGameOverPoints = MutableStateFlow(0)
-    val gameOverPoints: Flow<Int> = mutableGameOverPoints
-
-    var move = MutableStateFlow(Pair(1, 0))
-        set(value) {
-            scope.launch {
-                mutex.withLock {
-                    value
-                }
-            }
-        }
-
-    init {
-        scope.launch {
-            var snakeLength = 4
-
-            while (true) {
-                delay(150)
-                mutableStateFieldGame.update {
-                    var newPosition = it.snake.first().let { position ->
-
-                        mutex.withLock {
-                            Pair(
-                                (position.first + move.value.first + BOARD_SIZE) % BOARD_SIZE,
-                                (position.second + move.value.second + BOARD_SIZE) % BOARD_SIZE
-                            )
-
-                        }
-                    }
-
-                    if (newPosition == it.food) {
-                        increasePoints()
-                        snakeLength++
-                    }
-
-                    if (it.snake.contains(newPosition)) {
-                        gameOver(snakeLength)
-                        snakeLength = 4
-                    }
-
-                    it.copy(
-                        food = if (newPosition == it.food) {
-                            Pair(
-                                Random.nextInt(BOARD_SIZE),
-                                Random.nextInt(BOARD_SIZE)
-                            )
-                        } else {
-                            it.food
-                        },
-                        snake = listOf(newPosition) + it.snake.take(snakeLength - 1)
-                    )
-                }
-            }
-        }
-    }
-
-    private fun increasePoints() {
-        scope.launch {
-            mutex.withLock {
-                mutablePoints.update {
-                    it + 1
-                }
-            }
-        }
-    }
-
-    private fun gameOver(points: Int) {
-        scope.launch {
-            mutex.withLock {
-                mutableGameOverPoints.update {
-                    points - 4
-                }
-            }
-        }
-    }
-
+class Game() {
     companion object {
         const val BOARD_SIZE = 16
     }
 }
 
+
 @Composable
 fun SnakeScreen(
-    game: Game,
+    snakeViewModel: SnakeViewModel,
     navigateToGameOverScreen: (points: Int?) -> Unit = {}
 ) {
-    val stateFieldGame = game.stateFieldGame.collectAsState(initial = null)
-    val points = game.points.collectAsState(initial = 0)
-    val gameOverPoints = game.gameOverPoints.collectAsState(initial = 0)
+    val stateFieldGame = snakeViewModel.stateFieldGame.collectAsState(initial = null)
+    val points = snakeViewModel.points.collectAsState(initial = 0)
+    val gameOverPoints = snakeViewModel.gameOverPoints.collectAsState(initial = 0)
 
     when (gameOverPoints.value) {
         0 -> {}
@@ -158,7 +67,7 @@ fun SnakeScreen(
             modifier = Modifier.fillMaxSize(),
             color = Color(4285563448)
         ) {
-            SnakeContent(stateFieldGame.value, points.value, game)
+            SnakeContent(stateFieldGame.value, points.value, snakeViewModel)
         }
     }
 
@@ -166,17 +75,17 @@ fun SnakeScreen(
 
 @Composable
 fun SnakeContent(
-    state: State?,
+    snakeGameState: SnakeGameState?,
     points: Int,
-    game: Game
+    snakeViewModel: SnakeViewModel
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        state?.let {
+        snakeGameState?.let {
             Board(it)
         }
         scoreboard(points)
         Buttons {
-            game.move.value = it
+            snakeViewModel.move.value = it
         }
     }
 }
@@ -246,7 +155,7 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
 
 
 @Composable
-fun Board(state: State) {
+fun Board(snakeGameState: SnakeGameState) {
     BoxWithConstraints(Modifier.padding(16.dp)) {
         val tileSize = maxWidth / Game.BOARD_SIZE
         Box(
@@ -257,18 +166,41 @@ fun Board(state: State) {
 
         Box(
             Modifier.offset(
-                x = tileSize * state.food.first,
-                y = tileSize * state.food.second
-            ).size(tileSize).background(Color(4283126560), CircleShape)
-        )
+                x = tileSize * snakeGameState.food.first,
+                y = tileSize * snakeGameState.food.second
+            ).size(tileSize)
+        ){
+            Image(
+                painter = painterResource(id = R.drawable.apple),
+                contentDescription = "Food Icon",
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
 
-        state.snake.forEach {
+        snakeGameState.snake.forEach {
             Box(
                 Modifier.offset(
                     x = tileSize * it.first,
                     y = tileSize * it.second
-                ).size(tileSize).background(Color(4283126560), Small)
-            )
+                ).size(tileSize)
+            ){
+                if(it == snakeGameState.snake.first()){
+                    Image(
+                        painter = painterResource(id = R.drawable.snake),
+                        contentDescription = "Head Icon",
+                        modifier = Modifier.fillMaxSize(),
+
+                    )
+                }else{
+                    Icon(
+                        painter = painterResource(id = R.drawable.corpo),
+                        contentDescription = "Body Icon",
+                        modifier = Modifier.fillMaxSize(),
+                        tint = Color(4283126560)
+                    )
+                }
+
+            }
         }
     }
 }
@@ -277,13 +209,12 @@ fun Board(state: State) {
 @Preview(showBackground = true)
 @Composable
 fun SnakePreview() {
-    val scope = CoroutineScope(Dispatchers.Default)
     SnakeComposeTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = Color(4285563448)
         ) {
-            SnakeScreen(Game(scope))
+            SnakeScreen(SnakeViewModel())
         }
     }
 }

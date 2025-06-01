@@ -8,8 +8,9 @@ import androidx.navigation.toRoute
 
 import com.example.snakecompose.ui.feature.gameover.GameOverScreen
 import com.example.snakecompose.ui.feature.home.HomeSnakeGameScreen
-import com.example.snakecompose.ui.feature.snakegame.Game
-import com.example.snakecompose.ui.feature.snakegame.SnakeScreen
+import com.example.snakecompose.ui.feature.snakegame.screen.Game
+import com.example.snakecompose.ui.feature.snakegame.screen.SnakeScreen
+import com.example.snakecompose.ui.feature.snakegame.viewmodel.SnakeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable
@@ -30,7 +31,7 @@ fun SnakeNavHost() {
     NavHost(navController = navController, startDestination = HomeRoute){
         composable<GameRoute> {
             SnakeScreen(
-               Game(CoroutineScope(Dispatchers.Default)),
+               SnakeViewModel(),
                navigateToGameOverScreen = { points ->
                    navController.navigate(GameOverRoute(points = points ))
                }
